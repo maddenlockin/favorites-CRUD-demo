@@ -28,3 +28,20 @@ export async function signOutUser() {
 }
 
 /* Data functions */
+
+export async function createListItem(item, rating) {
+    const response = await client
+        .from('favorites')
+        .insert([{ item, rating, user_id: client.auth.user().id }]); // because of RLS and our default values, we add user_id for free
+
+    return response.data;
+}
+
+export async function getListItems() {
+    const response = await client
+        .from('favorites')
+        .select()
+        .match({ user_id: client.auth.user().id });
+
+    return response.data;
+}

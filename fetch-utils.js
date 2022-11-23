@@ -32,7 +32,7 @@ export async function signOutUser() {
 export async function createListItem(item, rating) {
     const response = await client
         .from('favorites')
-        .insert([{ item, rating, user_id: client.auth.user().id }]); // because of RLS and our default values, we add user_id for free
+        .insert({ item, rating, user_id: client.auth.user().id }); // because of RLS and our default values, we add user_id for free
 
     return response.data;
 }
@@ -50,12 +50,14 @@ export async function getListItems() {
 // how do i refer to this particular item?
 // i use its id. Ids are unique. There is no way to accidentally update the wrong thing if you supply this unique id to supabase
 
-export async function editListItem(someId) {
+export async function editListItem(item) {
     // sets a given list item's property to true
+    console.log('first', item.cross_out);
     const response = await client
         .from('favorites')
-        .update({ cross_out: true })
-        .match({ id: someId });
+        .update({ cross_out: !item.cross_out })
+        .match({ id: item.id });
+    console.log('item.cross_out', item.cross_out);
 
     return response.data;
 }

@@ -2,6 +2,7 @@
 // this will check if we have a user and set signout link if it exists
 import './auth/user.js';
 import { createListItem, deleteList, editListItem, getListItems } from './fetch-utils.js';
+import { renderListItem } from './render-utils.js';
 
 /* Get DOM Elements */
 const form = document.querySelector('.create-form');
@@ -36,30 +37,21 @@ form.addEventListener('submit', async (e) => {
 
 /* Display Functions */
 async function fetchAndDisplayList() {
+    listEl.textContent = '';
     // - call supabase to fetch all shopping items for this user
     const list = await getListItems();
 
     // - loop through those items, create DOM elements, and append -- render items differently if "bought: true"
-    listEl.textContent = '';
     for (let item of list) {
-        const listItemEl = document.createElement('li');
+        const listItemEl = renderListItem(item);
 
-        listItemEl.classList.add('list-item');
+        listItemEl.addEventListener('click', async () => {
+            // change the boolean
+            await editListItem(item);
 
-        listItemEl.textContent = `${item.item}: ${item.rating}/10`;
-
-        if (item.cross_out) {
-            listItemEl.classList.add('cross-out-true');
-        } else {
-            listItemEl.classList.remove('cross-out-true');
-            listItemEl.addEventListener('click', async () => {
-                // change the boolean to true
-                await editListItem(item.id);
-
-                // after we update the data, let's fetch and render it again
-                fetchAndDisplayList();
-            });
-        }
+            // after we update the data, let's fetch and render it again
+            fetchAndDisplayList();
+        });
 
         listEl.append(listItemEl);
     }

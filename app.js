@@ -1,16 +1,23 @@
 /* Imports */
 // this will check if we have a user and set signout link if it exists
 import './auth/user.js';
-import { createListItem, getListItems } from './fetch-utils.js';
+import { createListItem, deleteList, editListItem, getListItems } from './fetch-utils.js';
 
 /* Get DOM Elements */
 const form = document.querySelector('.create-form');
-// const deleteButton = document.querySelector('.delete');
+const deleteButton = document.querySelector('#delete-button');
 const listEl = document.querySelector('.list');
 
-fetchAndDisplayList();
-
 /* Events */
+window.addEventListener('load', async () => {
+    await fetchAndDisplayList();
+});
+
+deleteButton.addEventListener('click', async () => {
+    await deleteList();
+    await fetchAndDisplayList();
+});
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -35,11 +42,24 @@ async function fetchAndDisplayList() {
     // - loop through those items, create DOM elements, and append -- render items differently if "bought: true"
     listEl.textContent = '';
     for (let item of list) {
-        const listItemEl = document.createElement('p');
+        const listItemEl = document.createElement('li');
 
         listItemEl.classList.add('list-item');
 
         listItemEl.textContent = `${item.item}: ${item.rating}/10`;
+
+        if (item.cross_out) {
+            listItemEl.classList.add('cross-out-true');
+        } else {
+            listItemEl.classList.remove('cross-out-true');
+            listItemEl.addEventListener('click', async () => {
+                // change the boolean to true
+                await editListItem(item.id);
+
+                // after we update the data, let's fetch and render it again
+                fetchAndDisplayList();
+            });
+        }
 
         listEl.append(listItemEl);
     }

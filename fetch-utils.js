@@ -45,3 +45,23 @@ export async function getListItems() {
 
     return response.data;
 }
+
+// i want to set cross_out:true for a particular item
+// how do i refer to this particular item?
+// i use its id. Ids are unique. There is no way to accidentally update the wrong thing if you supply this unique id to supabase
+
+export async function editListItem(someId) {
+    // sets a given list item's property to true
+    const response = await client
+        .from('favorites')
+        .update({ cross_out: true })
+        .match({ id: someId });
+
+    return response.data;
+}
+
+export async function deleteList() {
+    const response = await client.from('favorites').delete().match({ user_id: getUser().id });
+
+    return response.data;
+}

@@ -53,6 +53,10 @@ async function fetchAndDisplayList() {
             fetchAndDisplayList();
         });
 
+        if (item.cross_out) {
+            listItemEl.classList.add('cross-out-true');
+        }
+
         listEl.append(listItemEl);
     }
 }

@@ -4,9 +4,5 @@ export function renderListItem(item) {
 
     listItemEl.textContent = `${item.item}: ${item.rating}/10`;
 
-    if (item.cross_out) {
-        listItemEl.classList.add('cross-out-true');
-    }
-
     return listItemEl;
 }

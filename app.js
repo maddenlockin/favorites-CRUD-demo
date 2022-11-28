@@ -8,6 +8,7 @@ import { renderListItem } from './render-utils.js';
 const form = document.querySelector('.create-form');
 const deleteButton = document.querySelector('#delete-button');
 const listEl = document.querySelector('.list');
+const error = document.querySelector('#error');
 
 /* Events */
 window.addEventListener('load', async () => {
@@ -26,13 +27,15 @@ form.addEventListener('submit', async (e) => {
 
     const item = data.get('item');
     const rating = data.get('rating');
-
-    // - send the new item to supabase and create a new row
-    await createListItem(item, rating);
-
     form.reset();
 
-    await fetchAndDisplayList();
+    // - send the new item to supabase and create a new row
+    const newItem = await createListItem(item, rating);
+    if (newItem) {
+        await fetchAndDisplayList();
+    } else {
+        error.textContent = 'Something went wrong while adding your favorite';
+    }
 });
 
 /* Display Functions */
@@ -40,23 +43,26 @@ async function fetchAndDisplayList() {
     listEl.textContent = '';
     // - call supabase to fetch all shopping items for this user
     const list = await getListItems();
+    if (list) {
+        // - loop through those items, create DOM elements, and append -- render items differently if "bought: true"
+        for (let item of list) {
+            const listItemEl = renderListItem(item);
 
-    // - loop through those items, create DOM elements, and append -- render items differently if "bought: true"
-    for (let item of list) {
-        const listItemEl = renderListItem(item);
+            listItemEl.addEventListener('click', async () => {
+                // change the boolean
+                await editListItem(item);
 
-        listItemEl.addEventListener('click', async () => {
-            // change the boolean
-            await editListItem(item);
+                // after we update the data, let's fetch and render it again
+                fetchAndDisplayList();
+            });
 
-            // after we update the data, let's fetch and render it again
-            fetchAndDisplayList();
-        });
+            if (item.cross_out) {
+                listItemEl.classList.add('cross-out-true');
+            }
 
-        if (item.cross_out) {
-            listItemEl.classList.add('cross-out-true');
+            listEl.append(listItemEl);
         }
-
-        listEl.append(listItemEl);
+    } else {
+        error.textContent = 'Something went wrong getting your favorites';
     }
 }

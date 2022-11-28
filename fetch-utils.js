@@ -31,17 +31,14 @@ export async function signOutUser() {
 
 export async function createListItem(item, rating) {
     const response = await client
-        .from('favorites')
+        .from('items')
         .insert({ item, rating, user_id: client.auth.user().id }); // because of RLS and our default values, we add user_id for free
 
     return response.data;
 }
 
 export async function getListItems() {
-    const response = await client
-        .from('favorites')
-        .select()
-        .match({ user_id: client.auth.user().id });
+    const response = await client.from('items').select().match({ user_id: client.auth.user().id });
 
     return response.data;
 }
@@ -52,18 +49,16 @@ export async function getListItems() {
 
 export async function editListItem(item) {
     // sets a given list item's property to true
-    console.log('first', item.cross_out);
     const response = await client
-        .from('favorites')
+        .from('items')
         .update({ cross_out: !item.cross_out })
         .match({ id: item.id });
-    console.log('item.cross_out', item.cross_out);
 
     return response.data;
 }
 
 export async function deleteList() {
-    const response = await client.from('favorites').delete().match({ user_id: getUser().id });
+    const response = await client.from('items').delete().match({ user_id: getUser().id });
 
     return response.data;
 }
